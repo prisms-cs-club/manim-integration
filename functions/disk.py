@@ -61,14 +61,53 @@ class Disk(ThreeDScene):
 
         # rotate the first rectangle around the x axis to form a cylinder
         first_rectangle = rects[0]
-        self.play(Rotate(first_rectangle, PI/2, X_AXIS))
+        rectangle_path_outline = Circle(color = WHITE, radius = first_rectangle.get_height())
+        rectangle_path_outline.shift([first_rectangle.get_x(), 0, 0])
+        rectangle_path_outline.rotate(PI / 2, axis = Y_AXIS, about_point=[first_rectangle.get_x(),0,0])
+        rectangle_path_outline.rotate(-PI / 2, axis = X_AXIS, about_point=[first_rectangle.get_x(),0,0])
+        rectangle_path_outline.rotate(PI, axis = Z_AXIS, about_point=[first_rectangle.get_x(),0,0])
+        self.play(Rotate(first_rectangle,  -2 * PI, X_AXIS, about_point=[first_rectangle.get_x(),0,0]), DrawBorderThenFill(rectangle_path_outline))
+        self.play(rectangle_path_outline.animate.set_fill(opacity=0.5))
+
+        rotate_animations = []
+        opacity_animations = []
+        for rect in rects[1:]:
+            rectangle_path_outline = Circle(color = WHITE, radius = rect.get_height())
+            rectangle_path_outline.shift([rect.get_x(), 0, 0])
+            rectangle_path_outline.rotate(PI / 2, axis = Y_AXIS, about_point=[rect.get_x(),0,0])
+            rectangle_path_outline.rotate(-PI / 2, axis = X_AXIS, about_point=[rect.get_x(),0,0])
+            rectangle_path_outline.rotate(PI, axis = Z_AXIS, about_point=[rect.get_x(),0,0])
+            rotate_animations.append(Rotate(rect,  -2 * PI, X_AXIS, about_point=[rect.get_x(),0,0]))
+            rotate_animations.append(DrawBorderThenFill(rectangle_path_outline))
+            
+            opacity_animations.append(rectangle_path_outline.animate.set_fill(opacity=0.1))
+
+        self.play(*rotate_animations)
+        self.wait(1)
+        self.play(*opacity_animations)
+
+        fade_out_animations = []
+        for mobject in self.mobjects:
+            fade_out_animations.append(FadeOut(mobject))
+        self.play(*fade_out_animations)
         self.wait(1)
 
-        cylinder = Cylinder(radius=rect.width / 2, height=rect.height)
-
-        self.add(rect, cylinder)
-
-        self.play(Rotate(rect, PI / 2, axis=X_AXIS))
+        # Calculate area of circles
+        self.set_camera_orientation(phi=0 * DEGREES, theta=-90 * DEGREES)
+        first_circle = Circle(color = WHITE, radius = rect.get_height())
+        new_first_rectangle = rects[0].copy()
+        new_first_rectangle.move_to(ORIGIN).shift(RIGHT * 5)
+        first_circle.next_to(new_first_rectangle, LEFT * 9)
+        self.play(Create(first_circle), Create(new_first_rectangle))
+        self.wait(1)
+        radius = Line(first_circle.get_center(), [first_circle.get_x(), first_circle.get_height()/2, first_circle.get_z()])
+        self.play(Create(radius))
+        self.wait(1)
+        rectangle_label = MathTex("r")
+        rectangle_label.next_to(radius, LEFT)
+        circle_label = MathTex("r")
+        circle_label.next_to(new_first_rectangle, LEFT)
+        self.play(Write(rectangle_label), Write(circle_label))
 
 
 
