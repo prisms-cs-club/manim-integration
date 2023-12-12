@@ -71,8 +71,10 @@ class Disk(ThreeDScene):
 
         rotate_animations = []
         opacity_animations = []
+        outlines = []
         for rect in rects[1:]:
             rectangle_path_outline = Circle(color = WHITE, radius = rect.get_height())
+            outlines.append(rectangle_path_outline)
             rectangle_path_outline.shift([rect.get_x(), 0, 0])
             rectangle_path_outline.rotate(PI / 2, axis = Y_AXIS, about_point=[rect.get_x(),0,0])
             rectangle_path_outline.rotate(-PI / 2, axis = X_AXIS, about_point=[rect.get_x(),0,0])
@@ -83,8 +85,21 @@ class Disk(ThreeDScene):
             opacity_animations.append(rectangle_path_outline.animate.set_fill(opacity=0.1))
 
         self.play(*rotate_animations)
-        self.wait(1)
+        self.wait(0.2)
         self.play(*opacity_animations)
+
+        self.begin_ambient_camera_rotation(rate=0.25)
+        self.wait(3)
+
+        # bring the first outline out of the axes range and move camera to face it
+        self.play(rectangle_path_outline.animate.shift(LEFT * 10))
+        self.wait(1)
+        self.move_camera(phi = 75 * DEGREES, theta = -45 * DEGREES)
+        self.wait(1)
+
+        for outline in outlines:
+            
+
 
         fade_out_animations = []
         for mobject in self.mobjects:
@@ -108,6 +123,26 @@ class Disk(ThreeDScene):
         circle_label = MathTex("r")
         circle_label.next_to(new_first_rectangle, LEFT)
         self.play(Write(rectangle_label), Write(circle_label))
+
+        # Zoom out and show other rectangles
+        
+
+        self.set_camera_orientation(distance=10)
+        self.wait(1)
+        # for 
+        # new_first_rectangle = rects[0].copy()
+        # new_first_rectangle.move_to(ORIGIN).shift(RIGHT * 5)
+        # first_circle.next_to(new_first_rectangle, LEFT * 9)
+        # self.play(Create(first_circle), Create(new_first_rectangle))
+        # self.wait(1)
+        # radius = Line(first_circle.get_center(), [first_circle.get_x(), first_circle.get_height()/2, first_circle.get_z()])
+        # self.play(Create(radius))
+        # self.wait(1)
+        # rectangle_label = MathTex("r")
+        # rectangle_label.next_to(radius, LEFT)
+        # circle_label = MathTex("r")
+        # circle_label.next_to(new_first_rectangle, LEFT)
+        # self.play(Write(rectangle_label), Write(circle_label))
 
 
 
